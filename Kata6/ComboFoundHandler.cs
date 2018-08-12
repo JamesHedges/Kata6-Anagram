@@ -1,23 +1,30 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using MediatR;
+using System.Linq;
 
 namespace Kata6
 {
-    public class ComboFoundHandler : IRequestHandler<ComboFound, FoundWord>
+    public class ComboFoundHandler : INotificationHandler<ComboFound>
     {
         private readonly TextWriter _writer;
+        private readonly List<string> _words;
 
-        public ComboFoundHandler(TextWriter writer)
+        public ComboFoundHandler(TextWriter writer, List<string> words)
         {
             _writer = writer;
+            _words = words;
         }
 
-        public async Task<FoundWord> Handle(ComboFound request, CancellationToken cancellationToken)
+        public async Task Handle(ComboFound notification, CancellationToken cancellationToken)
         {
-            await _writer.WriteLineAsync($"Handling ComboFound: {request.Combo}");
-            return new FoundWord {Word = request.Combo};
+            int wordIndex = _words.BinarySearch(notification.Combo);
+            if (wordIndex >= 0)
+            {
+                    _writer.Write($@" {notification.Combo}");
+            }
         }
     }
 }

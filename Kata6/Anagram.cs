@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using MediatR;
@@ -8,37 +7,28 @@ namespace Kata6
 {
     public class Anagram
     {
-        private List<string> _combinations;
         private TextWriter _writer;
         private readonly IMediator _mediator;
+        private const string delimiter = "";
 
-        public Anagram(WrappingWriter writer, IMediator mediator, string letters)
+        public Anagram(WrappingWriter writer, IMediator mediator)
         {
             _writer = writer;
             _mediator = mediator;
-            Letters = new Queue<char>(letters.ToCharArray());
         }
-
-        private List<string> Words => _combinations ?? (_combinations = new List<string>());
 
         public Queue<char> Letters { get; private set; }
 
         public long ExpectedCombos => GetFactorial(Letters.Count);
-        public long WordCount => Words.Count;
 
-        public List<string> FindAll()
+        public void FindAll(string testWord)
         {
-            Stopwatch stopwatch = new Stopwatch();
-
-            Words.Clear();
-            stopwatch.Start();
-            ProcessStack(new Stack<char>(), Letters);
-            stopwatch.Stop();
-            _writer.WriteLine($"{stopwatch.ElapsedMilliseconds/1000} seconds to get all combinations.");
-            return Words;
+            string searchWord = testWord;
+            Letters = new Queue<char>(testWord.ToCharArray());
+            ProcessStack(searchWord, new Stack<char>(), Letters);
         }
 
-        private void ProcessStack(Stack<char> prefix, Queue<char> remainder)
+        private void ProcessStack(string searchWord, Stack<char> prefix, Queue<char> remainder)
         {
             if (remainder.Any())
             {
@@ -46,14 +36,16 @@ namespace Kata6
                 for (var i = 0; i < count; i++)
                 {
                     prefix.Push(remainder.Dequeue());
-                    ProcessStack(prefix, remainder);
+                    ProcessStack(searchWord, prefix, remainder);
                 }
             }
             else
             {
-                var word = string.Join(",", prefix.Reverse());
-                Words.Add(word);
-                _mediator.Send(new ComboFound {Combo = word});
+                var word = string.Join(delimiter, prefix.Reverse());
+                if (word != searchWord)
+                {
+                    _mediator.Publish(new ComboFound { Combo = word });
+                }
             }
             if (prefix.Any())
                 remainder.Enqueue(prefix.Pop());

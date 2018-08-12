@@ -2,7 +2,7 @@
 
 namespace Kata6
 {
-    public class ComboFound : IRequest<FoundWord>
+    public class ComboFound : INotification
     {
         public string Combo { get; set; }
     }
