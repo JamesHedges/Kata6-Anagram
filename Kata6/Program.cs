@@ -145,13 +145,13 @@ namespace Kata6
         {
             Stopwatch swSearch = new Stopwatch();
             Stopwatch swElapsed = new Stopwatch();
-            Anagrammer anagrammer = new Anagrammer(writer);
+            Anagrammer anagrammer = new Anagrammer(words);
 
             writer.WriteLine($"{Environment.NewLine}Starting Anagrammer");
 
             swElapsed.Start();
             swSearch.Start();
-            var resultSort = anagrammer.ReturnAnagram(words, wordTest);
+            var resultSort = anagrammer.FindAll(wordTest);
             swSearch.Stop();
 
             resultSort.ForEach(g => writer.WriteLine(String.Join(" ", g)));

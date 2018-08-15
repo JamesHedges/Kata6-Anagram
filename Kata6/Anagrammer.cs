@@ -6,25 +6,35 @@ namespace Kata6
 {
     public class Anagrammer
     {
+        private readonly List<string> _words;
 
-        public Anagrammer(WrappingWriter writer)
+        public Anagrammer(List<string> words)
         {
+            _words = words;
         }
 
-        public List<IGrouping<string, string>> ReturnAnagram(List<string> words)
+        public List<IGrouping<string, string>> FindAll()
         {
-            return GetAll(words).ToList();
+            return GetAll().ToList();
         }
-        public List<IGrouping<string, string>> ReturnAnagram(List<string> words, List<string> wordTest)
+
+        public List<IGrouping<string, string>> FindAll(List<string> wordTest)
         {
-            return GetAll(words)
-                .Where(g => g.Any(x => wordTest.Contains(x)))
+            return GetAll()
+                .Where(g => g.Any(wordTest.Contains))
+            .ToList();
+        }
+
+        public List<IGrouping<string, string>> FindAll(string wordTest)
+        {
+            return GetAll()
+                .Where(g => g.Any(wordTest.Contains))
                 .ToList();
         }
 
-        private IEnumerable<IGrouping<string, string>> GetAll(List<string> words)
+        private IEnumerable<IGrouping<string, string>> GetAll()
         {
-            return words.GroupBy(w => String.Concat(w.OrderBy(c => c)))
+            return _words.GroupBy(w => String.Concat(w.OrderBy(c => c)))
                 .Where(g => g.Count() > 1);
         }
     }
