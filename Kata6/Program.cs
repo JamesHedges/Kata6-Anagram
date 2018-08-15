@@ -17,6 +17,7 @@ namespace Kata6
             List<string> words;
             List<string> wordTest = new List<string>
             {
+                "ABC",
                 "paste",
                 "kinship",
                 "kinships",
@@ -38,9 +39,14 @@ namespace Kata6
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer, words);
 
-            RunAnagrammer(writer, words);
+            RunAnagrammer(writer, words, wordTest);
 
-            RunAnagram(writer, words, wordTest, mediator);
+            //RunCombinator(writer, words, wordTest, mediator);
+
+            //RunAnagram(writer, words, wordTest, mediator);
+
+            //RunAnagram2A(writer, words, wordTest);
+            RunAnagram2B(writer, words, wordTest);
 
             Console.ReadKey();
         }
@@ -49,8 +55,9 @@ namespace Kata6
         {
             Stopwatch stopwatch = new Stopwatch();
             Anagram anagram = new Anagram(writer, mediator);
+            GenericCombinator<char> combinations = new GenericCombinator<char>();
 
-            writer.WriteLine("Running Anagram");
+            writer.WriteLine($"{Environment.NewLine}Running Anagram");
             stopwatch.Start();
             foreach (var word in wordTest)
             {
@@ -62,21 +69,98 @@ namespace Kata6
             writer.WriteLine($"{Environment.NewLine}Done in {stopwatch.ElapsedMilliseconds}ms!");
         }
 
-        private static void RunAnagrammer(WrappingWriter writer, List<string> words)
+        private static void RunAnagram2A(WrappingWriter writer, List<string> words, List<string> wordTest)
         {
             Stopwatch stopwatch = new Stopwatch();
+            ICombinator<char> combinator = new GenericCombinator<char>();
+            Anagram2 anagram = new Anagram2(combinator, words);
+
+            writer.WriteLine($"{Environment.NewLine}Running Anagram2A");
+            stopwatch.Start();
+            foreach (var word in wordTest)
+            {
+                writer.Write($"{word}:");
+                var results = anagram.FindAll(word);
+                foreach(var result in results)
+                {
+                    writer.Write($@" {result}");
+                }
+                writer.WriteLine();
+            }
+            stopwatch.Stop();
+            writer.WriteLine($"{Environment.NewLine}Done in {stopwatch.ElapsedMilliseconds}ms!");
+        }
+
+        private static void RunAnagram2B(WrappingWriter writer, List<string> words, List<string> wordTest)
+        {
+            Stopwatch swSearch = new Stopwatch();
+            Stopwatch swElapsed = new Stopwatch();
+            ICombinator<char> combinator = new GenericCombinator<char>();
+            Anagram2 anagram = new Anagram2(combinator, words);
+
+            writer.WriteLine($"{Environment.NewLine}Running Anagram2B");
+            swElapsed.Start();
+            swSearch.Start();
+            var anagrams = anagram.FindAll(wordTest);
+            swSearch.Stop();
+            foreach (var pair in anagrams)
+            {
+                writer.Write($"{pair.Key}:");
+                foreach(var result in pair.Value)
+                {
+                    writer.Write($@" {result}");
+                }
+                writer.WriteLine();
+            }
+            swElapsed.Stop();
+
+            writer.WriteLine($"{Environment.NewLine}Anagram2B completed! {Environment.NewLine}\tSearchTime:   {swSearch.Elapsed}{Environment.NewLine}\tElapsed Time: {swElapsed.Elapsed}");
+            writer.WriteLine($"Number of words: {words.Count}");
+            writer.WriteLine($"Number of words to test: {wordTest.Count}");
+            writer.WriteLine($"Number of anagram pairs: {anagrams.Count}");
+        }
+
+        private static void RunCombinator(WrappingWriter writer, List<string> wordTest, IMediator mediator)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            GenericCombinator<char> combinations = new GenericCombinator<char>();
+
+            writer.WriteLine($"{Environment.NewLine}Running Combinator");
+            stopwatch.Start();
+            foreach (var word in wordTest)
+            {
+                writer.Write($"{word}:");
+                var combos = combinations.FindCombinations(word.ToCharArray());
+                foreach(var combo in combos)
+                {
+                    mediator.Publish(new ComboFound { Combo = new string(combo) }).Wait();
+                }
+                writer.WriteLine();
+            }
+            stopwatch.Stop();
+            writer.WriteLine($"{Environment.NewLine}Done in {stopwatch.ElapsedMilliseconds}ms!");
+        }
+
+        private static void RunAnagrammer(WrappingWriter writer, List<string> words, List<string> wordTest)
+        {
+            Stopwatch swSearch = new Stopwatch();
+            Stopwatch swElapsed = new Stopwatch();
             Anagrammer anagrammer = new Anagrammer(writer);
 
-            writer.WriteLine("Starting Annagramer");
-            stopwatch.Start();
+            writer.WriteLine($"{Environment.NewLine}Starting Anagrammer");
 
-            var resultSort = anagrammer.ReturnAnagram(words);
+            swElapsed.Start();
+            swSearch.Start();
+            var resultSort = anagrammer.ReturnAnagram(words, wordTest);
+            swSearch.Stop();
+
             resultSort.ForEach(g => writer.WriteLine(String.Join(" ", g)));
+            swElapsed.Stop();
 
-            stopwatch.Stop();
 
-            writer.WriteLine($"\n\rAction completed! \n\rElapsed Time: {stopwatch.Elapsed}");
+            writer.WriteLine($"{Environment.NewLine}Anagram2B completed! {Environment.NewLine}\tSearchTime:   {swSearch.Elapsed}{Environment.NewLine}\tElapsed Time: {swElapsed.Elapsed}");
             writer.WriteLine($"Number of words: {words.Count}");
+            writer.WriteLine($"Number of words to test: {wordTest.Count}");
             writer.WriteLine($"Number of anagram pairs: {resultSort.Count}");
         }
 

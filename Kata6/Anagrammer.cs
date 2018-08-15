@@ -13,11 +13,19 @@ namespace Kata6
 
         public List<IGrouping<string, string>> ReturnAnagram(List<string> words)
         {
-            var resultSort = words.GroupBy(w => String.Concat(w.OrderBy(c => c)))
-                .Where(g => g.Count() > 1)
+            return GetAll(words).ToList();
+        }
+        public List<IGrouping<string, string>> ReturnAnagram(List<string> words, List<string> wordTest)
+        {
+            return GetAll(words)
+                .Where(g => g.Any(x => wordTest.Contains(x)))
                 .ToList();
+        }
 
-            return resultSort;
+        private IEnumerable<IGrouping<string, string>> GetAll(List<string> words)
+        {
+            return words.GroupBy(w => String.Concat(w.OrderBy(c => c)))
+                .Where(g => g.Count() > 1);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using MediatR;
 
 namespace Kata6
@@ -51,7 +52,7 @@ namespace Kata6
                 remainder.Enqueue(prefix.Pop());
         }
 
-        private static long GetFactorial(int number)
+        private static long GetFactorial(long number)
         {
             if (number == 0)
             {
